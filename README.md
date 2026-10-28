@@ -1,5 +1,7 @@
 # Facebook Messenger Archive Explorer
 
+> *Born out of the effort to rediscover old messages with an old friend.*
+
 A lightweight, private, client-side web application and local indexer that transforms downloaded Facebook Messenger archives (HTML format) into a fast, modern Facebook Messenger desktop/web interface.
 
 ![Privacy](https://img.shields.io/badge/Privacy-100%25%20Offline%20%26%20Local-green)
