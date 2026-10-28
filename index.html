@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facebook Messenger Archive Explorer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- WELCOME SCREEN (Shown only if no precompiled data is found) -->
+  <div class="welcome-screen" id="welcomeScreen">
+    <div class="welcome-logo">⚡</div>
+    <h2>Facebook Messenger Archive Explorer</h2>
+    <p style="color:var(--text-muted); margin-top:6px; max-width:480px;">
+      View, search, and relive your downloaded Facebook Messenger messages in an exact, modern Messenger interface.
+    </p>
+
+    <div class="welcome-card" style="margin-top:24px;">
+      <h3>Choose your Facebook Export Folder</h3>
+      <p style="font-size:13px; color:var(--text-muted);">
+        Select the root unzipped folder downloaded from Facebook (the folder containing <code>your_facebook_activity</code>).
+      </p>
+      <input type="file" id="browserFolderPicker" webkitdirectory directory multiple style="display:none;" />
+      <button class="btn-primary" onclick="document.getElementById('browserFolderPicker').click()">
+        📁 Select Facebook Folder
+      </button>
+      <div style="font-size:12px; color:var(--text-time); margin-top:8px;">
+        100% private & offline. No files are uploaded to any server.
+      </div>
+    </div>
+  </div>
+
+  <div id="app">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>Chats</h1>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-icon" id="btnOpenSettings" title="Settings & Contact Aliases">⚙️</button>
+          <button class="btn-icon" id="btnToggleDark" title="Toggle Dark / Light Mode">🌓</button>
+        </div>
+      </div>
+
+      <!-- Global Stats Summary -->
+      <div class="global-stats-banner">
+        <div>Account: <strong id="statOwnerName">You</strong></div>
+        <div class="stats-grid">
+          <div class="stats-item">💬 <span id="statConvCount">0</span> Chats</div>
+          <div class="stats-item">✉️ <span id="statMsgCount">0</span> Msgs</div>
+          <div class="stats-item">📸 <span id="statPhotoCount">0</span> Photos</div>
+          <div class="stats-item">🎥 <span id="statVideoCount">0</span> Videos</div>
+          <div class="stats-item">🎙️ <span id="statAudioCount">0</span> Audios</div>
+          <div class="stats-item">📁 <span id="statFileCount">0</span> Files</div>
+        </div>
+      </div>
+
+      <!-- Search in conversations list -->
+      <div class="sidebar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="convSearchInput" placeholder="Search Messenger chats..." />
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="filter-tabs">
+        <div class="filter-chip active" data-category="all">All (<span id="catCountAll">0</span>)</div>
+        <div class="filter-chip" data-category="inbox">Inbox (<span id="catCountInbox">0</span>)</div>
+        <div class="filter-chip" data-category="e2ee">End-to-End (<span id="catCountE2EE">0</span>)</div>
+        <div class="filter-chip" data-category="archived_threads">Archived (<span id="catCountArchived">0</span>)</div>
+        <div class="filter-chip" data-category="message_requests">Requests (<span id="catCountRequests">0</span>)</div>
+      </div>
+
+      <!-- Conversation List -->
+      <div class="conv-list" id="convListContainer"></div>
+    </aside>
+
+    <!-- CHAT MAIN AREA -->
+    <main class="chat-area" id="chatArea">
+      <!-- HEADER -->
+      <header class="chat-header">
+        <div class="header-user-info">
+          <div class="conv-avatar-wrap">
+            <div class="conv-avatar" id="headerAvatar">M</div>
+            <div class="conv-online-dot"></div>
+          </div>
+          <div class="header-text">
+            <div class="header-title-row">
+              <div class="header-title" id="headerTitle">Select a conversation</div>
+              <button class="btn-edit-alias" id="btnEditAlias" title="Rename this contact / Assign alias">✏️ Rename</button>
+            </div>
+            <div class="header-subtitle" id="headerSubtitle">Click any chat from the sidebar to start reading</div>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn-icon" id="btnOpenSearch" title="Search in this conversation">🔍</button>
+          <button class="btn-icon" id="btnThemeMenu" title="Change Theme Color">🎨</button>
+          <button class="btn-icon" id="btnToggleDrawer" title="Shared Media & Files">🖼️</button>
+        </div>
+
+        <!-- Theme Color Dropdown -->
+        <div class="dropdown-menu" id="themeDropdown">
+          <div class="dropdown-item" data-theme-color="classic">
+            <div class="color-swatch" style="background:#0084ff;"></div>
+            <span>Messenger Blue</span>
+          </div>
+          <div class="dropdown-item" data-theme-color="ocean">
+            <div class="color-swatch" style="background:#00a884;"></div>
+            <span>Ocean Teal</span>
+          </div>
+          <div class="dropdown-item" data-theme-color="rose">
+            <div class="color-swatch" style="background:#ff416c;"></div>
+            <span>Sweet Rose</span>
+          </div>
+          <div class="dropdown-item" data-theme-color="violet">
+            <div class="color-swatch" style="background:#8e2de2;"></div>
+            <span>Neon Violet</span>
+          </div>
+          <div class="dropdown-item" data-theme-color="sunset">
+            <div class="color-swatch" style="background:#f77737;"></div>
+            <span>Sunset Amber</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- SEARCH BAR OVERLAY -->
+      <div class="search-panel" id="searchPanel">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="inChatSearchInput" placeholder="Search keywords in this chat..." />
+        </div>
+        <div class="search-counter" id="searchCounter"></div>
+        <button class="btn-icon" id="btnPrevMatch" title="Previous match">▲</button>
+        <button class="btn-icon" id="btnNextMatch" title="Next match">▼</button>
+        <button class="btn-icon" id="btnCloseSearch" title="Close search">✕</button>
+      </div>
+
+      <!-- MESSAGES FEED -->
+      <div class="messages-container" id="messagesFeed">
+        <div class="empty-state">
+          <div class="empty-state-icon">💬</div>
+          <h3>Select a conversation to view messages</h3>
+          <p>Choose any chat from the sidebar to browse messages, photos, voice notes and files.</p>
+        </div>
+      </div>
+
+      <!-- SCROLL TO BOTTOM BUTTON -->
+      <button class="scroll-bottom-btn" id="btnScrollBottom" title="Scroll to latest">↓</button>
+
+      <!-- CHAT FOOTER -->
+      <footer class="chat-footer">
+        🔒 Facebook Messenger Archive Explorer • Read-only viewer
+      </footer>
+    </main>
+
+    <!-- RIGHT DRAWER: MEDIA GALLERY -->
+    <aside class="drawer collapsed" id="rightDrawer">
+      <div class="drawer-header">
+        <h3>Shared Media & Files</h3>
+        <button class="btn-icon" id="btnCloseDrawer">✕</button>
+      </div>
+
+      <div class="drawer-tabs">
+        <div class="drawer-tab active" data-drawer-tab="photos">Photos (<span id="drawerPhotoCount">0</span>)</div>
+        <div class="drawer-tab" data-drawer-tab="videos">Videos (<span id="drawerVideoCount">0</span>)</div>
+        <div class="drawer-tab" data-drawer-tab="audios">Voice (<span id="drawerAudioCount">0</span>)</div>
+        <div class="drawer-tab" data-drawer-tab="files">Files (<span id="drawerFileCount">0</span>)</div>
+      </div>
+
+      <div class="drawer-content" id="drawerContent"></div>
+    </aside>
+  </div>
+
+  <!-- RENAME CONTACT MODAL -->
+  <div class="modal-overlay" id="renameModal">
+    <div class="modal-card">
+      <h3>Rename Contact / Assign Alias</h3>
+      <p style="font-size:13px; color:var(--text-muted);">
+        Give this contact a custom display name (useful if their Facebook account was deleted or says "Facebook User").
+      </p>
+      <input type="text" id="renameInput" class="modal-input" placeholder="e.g. John Doe" />
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelRename">Cancel</button>
+        <button class="btn-action-primary" id="btnSaveRename">Save Name</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card" style="max-width:540px;">
+      <h3>Settings & Contact Aliases</h3>
+      <div>
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">Your Name (Account Owner):</label>
+        <input type="text" id="ownerNameInput" class="modal-input" placeholder="e.g. Your Name" />
+        <small style="color:var(--text-muted); font-size:11.5px;">Messages sent by this name will appear on the right side in blue.</small>
+      </div>
+
+      <div>
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">Active Aliases:</label>
+        <div id="aliasListTable" style="max-height:160px; overflow-y:auto; background:var(--hover-bg); border-radius:8px; padding:8px; font-size:12.5px;">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCloseSettings">Close</button>
+        <button class="btn-action-primary" id="btnSaveSettings">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX MODAL -->
+  <div class="lightbox" id="lightboxModal">
+    <button class="lightbox-close" id="btnCloseLightbox">✕</button>
+    <button class="lightbox-nav lightbox-prev" id="btnLightboxPrev">❮</button>
+    <button class="lightbox-nav lightbox-next" id="btnLightboxNext">❯</button>
+    <div id="lightboxMediaContainer"></div>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+
+  <!-- AUTO-LOAD OPTIONAL PRECOMPILED INDEX -->
+  <script src="data/index.js" onerror="window.__HAS_PRECOMPILED_DATA = false;" onload="window.__HAS_PRECOMPILED_DATA = true;"></script>
+  <script src="app.js"></script>
+</body>
+</html>

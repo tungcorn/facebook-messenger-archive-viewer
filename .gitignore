@@ -1,0 +1,34 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.so
+
+# Environment & Virtual environments
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# Facebook raw data & indexed caches (Never commit personal archives!)
+data/
+your_facebook_activity/
+messages/
+personal_information/
+*.zip
+*.tar.gz
+
+# IDE & OS files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
